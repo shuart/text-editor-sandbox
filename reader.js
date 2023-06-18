@@ -193,6 +193,7 @@ var createReader = function (text) {
     var read = function () {
         evalStack.continue = true //restart reading flag if needed
         var thisStepDelay = 0
+        
 
         var lineObj = jsonRuntime[evalStack.currentLine]
         if (isVisible(lineObj)) {
