@@ -1,0 +1,95 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="test.css">
+</head>
+<body>
+
+
+
+<div class="element"></div>
+<h1>My First Heading</h1>
+<p>My first paragraph.</p>
+<div style="display: none" id="content">
+  <h3>Hello ProseMirror</h3>
+  <p>=test</p>
+  <p>This is editable text. You can focus it and start typing.</p>
+  <p>*question1 ->test</p>
+  <p>*question1 to test gather</p>
+  <p>response1 to test gather</p>
+  <p>+question1 stick ->test</p>
+  <p>This is editable text. You can focus it and start typing.</p>
+  <p>*question2 </p>
+  <p>question2 response  before DIVERT</p>
+  <p>->test2</p>
+
+  <p>*question3 </p>
+  <p>To apply styling, you can select a piece of text and manipulate
+  its styling from the menu. The basic schema
+  supports <em>emphasis</em>, <strong>strong
+  text</strong>, <a href="http://marijnhaverbeke.nl/blog">links</a>, <code>code
+  font</code>, and <img src="/img/smiley.png"> images.</p>
+  <p>Block-level structure can be manipulated with key bindings (try
+  ctrl-shift-2 to create a level 2 heading, or enter in an empty
+  textblock to exit the parent block), or through the menu.</p>
+  
+  <p>- i am a gather Try using the “list” item in the menu to wrap this paragraph in
+  a numbered list.</p>
+  <p>i am after a gather Try using the “list” item in the menu to wrap this paragraph in
+    a numbered list.</p>
+  <p>=test2</p>
+  <p>anchor test reeading</p>
+  
+  <p>*question in test2</p>
+  <p>anchor test reeading2</p>
+  <p>*question in test2</p>
+  <p>anchor test reeading2</p>
+  <p>-a gather element</p>
+  
+</div>
+  
+<div class="json">json</div>"
+<script type="module" src="test.js"></script>"
+<style>
+  .problem { background: #fdd; border-bottom: 1px solid #f22; margin-bottom: -1px; }
+.lint-icon {
+  display: inline-block; position: absolute; right: 2px; cursor: pointer;
+  border-radius: 100px; background: #f22; color: white; font-family: times, georgia, serif;
+  font-size: 15px; font-weight: bold; width: 1.1em; height: 1.1em;
+  text-align: center; padding-left: .5px; line-height: 1.1em
+}
+.lint-icon:before { content: "!" }
+.ProseMirror { padding-right: 20px }
+  
+    .suggestion-item-active {
+    background: #08c;
+    color: #fff;
+  }
+
+  .prosemirror-mention-node {
+    color: #08c;
+  }
+
+  .prosemirror-tag-node {
+    color: #08c;
+  }
+
+  .prosemirror-suggestion {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid #999;
+  }
+
+  .suggestion-item-list {
+    background: #fff;
+    border: 1px solid #999;
+  }
+
+  .suggestion-item {
+    padding: 5px;
+  }
+  .suggestion-item:before {
+    border-top: 1px solid;
+  }
+</style>
+</body>
+</html> 
