@@ -48,6 +48,7 @@ var createAdler = function ({
     attributes=[
         "test",
     ],
+    onConnect=(self) => console.log("on connect",self),
     lifeCycle = [
         ["connected", (self)=> console.log(self)]
     ],
@@ -57,7 +58,7 @@ var createAdler = function ({
     effects=[
         (d)=> console.log("i am an effect at", d.test),
     ],
-    html = `<p>Hello World</p>`,
+    html = ()=>`<p>Hello World</p>`,
     css=`:host {color: deeppink;}`,
     cssfiles=[],
 }={}) {
@@ -136,6 +137,12 @@ var createAdler = function ({
 
             #holderData ={}
             shadowRoot = this.attachShadow({ mode: "open" })
+            useEffect = function (callback) {
+                createEffect(callback, this)
+            }
+            query = function (selector) {
+                return this.shadowRoot.querySelector(selector)
+            }
 
             constructor() {
                 super();
@@ -151,9 +158,11 @@ var createAdler = function ({
 
             connectedCallback() {
                 setEffects(this)
+                
                 this.shadowRoot.adoptedStyleSheets = [stylesheet].concat(cssfiles) //Add local css or external stylesheets
-                this.shadowRoot.innerHTML = currentHtml;
+                this.shadowRoot.innerHTML = currentHtml();
                 iterateLifeCycle(lifeCycle, 'connected', this)
+                onConnect(this)
                 iterateEvents(events, this )// Add event listeners when connected
             }
 
