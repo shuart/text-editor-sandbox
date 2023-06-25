@@ -6,8 +6,18 @@ import { HelloWorld } from './wcomp.js'
 var editor = createEditor()
 editor.addEditor(document.querySelector('.element'))
 
-document.body.appendChild(document.createElement("hello-world"))
 
+
+
+var webcomp = document.createElement("hello-world")
+document.body.appendChild(webcomp)
+console.log(webcomp.test);
+webcomp.test = 8
+console.log(webcomp.test);
+
+var attTest = document.createElement("div")
+document.body.appendChild(attTest)
+attTest.innerHTML ='<hello-world test="2"></hello-world>'
 
 document.querySelector(".json").addEventListener('click', function(){
 
