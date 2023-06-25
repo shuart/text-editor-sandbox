@@ -1,9 +1,12 @@
 import createEditor from './dist/module.js'
 import { createReader } from './reader.js'
+import { HelloWorld } from './wcomp.js'
 
 //var editor = createEditor({container:document.querySelector('.element')})
 var editor = createEditor()
 editor.addEditor(document.querySelector('.element'))
+
+document.body.appendChild(document.createElement("hello-world"))
 
 
 document.querySelector(".json").addEventListener('click', function(){
