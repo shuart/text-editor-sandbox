@@ -48,7 +48,8 @@ var createAdler = function ({
     attributes=[
         "test",
     ],
-    onConnect=(self) => console.log("on connect",self),
+    onRender=(self) => console.log("on connect",self),
+    onBeforeRender=(self) => console.log("on before render",self),
     lifeCycle = [
         ["connected", (self)=> console.log(self)]
     ],
@@ -58,8 +59,8 @@ var createAdler = function ({
     effects=[
         (d)=> console.log("i am an effect at", d.test),
     ],
-    html = ()=>`<p>Hello World</p>`,
-    css=`:host {color: deeppink;}`,
+    html = ()=>/*html*/`<p>Hello World</p>`,
+    css=/*css*/`:host {color: deeppink;}`,
     cssfiles=[],
 }={}) {
     var self = {}
@@ -112,7 +113,7 @@ var createAdler = function ({
                         return holderData[key].get();
                     },
                     set(value) {
-                        console.log(`(Setting "${key}" to "${value}")`);
+                        console.trace(`(Setting "${key}" to "${value}")`);
                         holderData[key].set(value);
                         // holderData.get(this)[key] = value;
                     }
@@ -129,6 +130,19 @@ var createAdler = function ({
         }
     }
 
+    var utilsToDomElement = function (html) {
+        var element = document.createElement("div")
+        element.innerHTML = html
+        return element
+    }
+    var utilsToTemplate = function (htmlFunction) {
+        return function(p){
+            var element = document.createElement("div")
+            element.innerHTML = htmlFunction(p)
+            return element
+        }
+    }
+
     var createWebcomponent = function () {
         const stylesheet = new CSSStyleSheet()
         stylesheet.replaceSync(css)
@@ -137,12 +151,17 @@ var createAdler = function ({
 
             #holderData ={}
             shadowRoot = this.attachShadow({ mode: "open" })
+            //ADLER METHODS
             useEffect = function (callback) {
                 createEffect(callback, this)
             }
             query = function (selector) {
                 return this.shadowRoot.querySelector(selector)
             }
+            toDom = utilsToDomElement
+            tpl = utilsToTemplate
+            
+            //END ADLER METHODS
 
             constructor() {
                 super();
@@ -156,14 +175,30 @@ var createAdler = function ({
                 return attributes;
             }
 
-            connectedCallback() {
+            beforeRender = function () {
+                onBeforeRender(this)
+            }
+
+            renderElement = function () {
                 setEffects(this)
                 
                 this.shadowRoot.adoptedStyleSheets = [stylesheet].concat(cssfiles) //Add local css or external stylesheets
                 this.shadowRoot.innerHTML = currentHtml();
                 iterateLifeCycle(lifeCycle, 'connected', this)
-                onConnect(this)
+                onRender(this)
                 iterateEvents(events, this )// Add event listeners when connected
+            }
+            update = function () {
+                setEffects(this)
+                this.shadowRoot.innerHTML = currentHtml();
+                iterateLifeCycle(lifeCycle, 'connected', this)
+                onRender(this)
+                iterateEvents(events, this )// Add event listeners when connected
+            }
+
+            connectedCallback() {
+                this.beforeRender()
+                this.renderElement()
             }
 
             disconnectedCallback() {
@@ -176,6 +211,7 @@ var createAdler = function ({
                 if (oldValue == newValue) {return}
                 this[name] = newValue //use the setters and getters to record change in local state
             }
+
         } 
         console.log("register "+ componentTag);
         customElements.define( componentTag, newComponent );
