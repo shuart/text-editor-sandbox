@@ -7,14 +7,12 @@ import { createAdler } from "./adler3.js"
 
 var renderFolder = function (self, folder, level) {
     var folderTemplate = self.tpl((p)=>`<p> >${p.name}<p>`)
-    console.log(self.treeJson);
-
     var domElement = folderTemplate({name:folder.name})
     domElement.style.paddingLeft= (self.paddingSize*level)+"px"
     domElement.addEventListener("click", ()=> {
         folder.closed= !folder.closed
         console.log(self.treeJson);
-        self.update()
+        // self.update()
     })
     self.query('.tree_area').appendChild(domElement)
 

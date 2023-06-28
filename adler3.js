@@ -5,15 +5,32 @@ var currentComponent = undefined;
 function createSignal(initialValue) {
     var self = {}
 	let value = initialValue;
-
 	// a set of callback functions, from createEffect
 	const subscribers = new Set();
+    const SignalObjectHandler = {
+        get: (target, key) => {
+            if(typeof target[key] === "object" && target[key] !== null) {
+            return new Proxy(target[key], SignalObjectHandler)
+            }
+    
+            return target[key]
+        },
+        set: (target, prop, value) => {
+            target[prop] = value
+            console.log("A change was made in a deep object!")
+            subscribers.forEach((fn) => fn[0](fn[1]));
+            return true
+        }
+    }
 
 	const read = () => {
 		if (currentListener !== undefined && currentComponent !== undefined) {
 			// before returning, track the current listener
 			subscribers.add([currentListener, currentComponent]);
 		}
+        if (typeof value === "object") {
+            return new Proxy(value, SignalObjectHandler)
+        }
 		return value;
 	};
 	const write = (newValue) => {
@@ -62,13 +79,13 @@ var createAdler = function ({
     html = ()=>/*html*/`<p>Hello World</p>`,
     css=/*css*/`:host {color: deeppink;}`,
     cssfiles=[],
+    debugLog= false,
 }={}) {
     var self = {}
     var componentTag = tag
     var eventToDisconnect =[]
     var currentHtml = html
     var currentCss = css
-
 
     var iterateLifeCycle = function (items, category, componentClass) {
         for (let i = 0; i  < items.length; i++) {
@@ -100,7 +117,6 @@ var createAdler = function ({
             eventToDisconnect[1].removeEventListener(eventToDisconnect[0], eventToDisconnect[2])
         }
     }
-
     var setProps = function (component, holderData) {
         for (const key in props) {
             if (props.hasOwnProperty(key)) {
@@ -108,12 +124,14 @@ var createAdler = function ({
                 holderData[key] = createSignal(props[key])
                 Object.defineProperty(component, key, { //add getters and setters https://stackoverflow.com/questions/68769030/js-define-getter-for-every-property-of-a-class
                     get() {
-                        console.log(`(Getting "${key}")`);
+                        if (debugLog) {console.log(`(Getting "${key}")`); }
+                        
                         // return holderData.get(this)[key];
                         return holderData[key].get();
                     },
                     set(value) {
-                        console.trace(`(Setting "${key}" to "${value}")`);
+                        if (debugLog) {console.trace(`(Setting "${key}" to "${value}")`); }
+                        
                         holderData[key].set(value);
                         // holderData.get(this)[key] = value;
                     }
@@ -122,14 +140,12 @@ var createAdler = function ({
             }
         }
     }
-
     var setEffects = function (component) {
         for (let i = 0; i < effects.length; i++) {
             const effect = effects[i];
             createEffect(effect, component);
         }
     }
-
     var utilsToDomElement = function (html) {
         var element = document.createElement("div")
         element.innerHTML = html
@@ -142,7 +158,6 @@ var createAdler = function ({
             return element
         }
     }
-
     var createWebcomponent = function () {
         const stylesheet = new CSSStyleSheet()
         stylesheet.replaceSync(css)
@@ -215,7 +230,6 @@ var createAdler = function ({
         } 
         console.log("register "+ componentTag);
         customElements.define( componentTag, newComponent );
-        
     }
     
     var createComponenentElement = function () {
@@ -240,7 +254,6 @@ var createAdler = function ({
     var init = function () {
         createWebcomponent()
     }
-
     init()
 
     self.mount = mount
