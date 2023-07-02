@@ -15,11 +15,12 @@ var webcomp = document.createElement("hello-world")
 document.body.appendChild(webcomp)
 console.log(webcomp.test);
 webcomp.test = 8
+webcomp.name = 8
 console.log(webcomp.test);
 
 var attTest = document.createElement("div")
 document.body.appendChild(attTest)
-attTest.innerHTML ='<hello-world test="2"></hello-world> <tree-view test="2"></tree-view>'
+attTest.innerHTML ='<hello-world to_print="2"></hello-world> <tree-view to_print="2"></tree-view>'
 
 document.querySelector(".json").addEventListener('click', function(){
 

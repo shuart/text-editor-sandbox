@@ -2,7 +2,7 @@ var subscriberStore =[];
 var currentListener = undefined;
 var currentComponent = undefined;
 
-function createSignal(initialValue) {
+function createSignal(initialValue, reactivity) {
     var self = {}
 	let value = initialValue;
 	// a set of callback functions, from createEffect
@@ -18,7 +18,11 @@ function createSignal(initialValue) {
         set: (target, prop, value) => {
             target[prop] = value
             console.log("A change was made in a deep object!")
-            subscribers.forEach((fn) => fn[0](fn[1]));
+            subscribers.forEach((fn) => {
+                if (fn[1].isConnected) {
+                    fn[0](fn[1])
+                }
+            });
             return true
         }
     }
@@ -28,21 +32,35 @@ function createSignal(initialValue) {
 			// before returning, track the current listener
 			subscribers.add([currentListener, currentComponent]);
 		}
-        if (typeof value === "object") {
+        if (typeof value === "object" && reactivity =="deep") {
             return new Proxy(value, SignalObjectHandler)
         }
 		return value;
 	};
 	const write = (newValue) => {
 		value = newValue;
+        console.log(subscribers);
 		// after setting the value, run any subscriber, aka effect, functions
-		subscribers.forEach((fn) => fn[0](fn[1]));
+		subscribers.forEach((fn) => {
+            if (fn[1].isConnected) {
+                fn[0](fn[1])
+            }
+        });
 	};
+
+    const _replaceValue = function (newValue) {
+        value = newValue;
+    }
+    const _getValue = function (newValue) {
+        return value
+    }
 
     const isSignal =()=> true;
 
     self.set = write
     self.get = read
+    self._replaceValue = _replaceValue
+    self._getValue = _getValue
     self.isSignal = isSignal
 	return self;
 }
@@ -80,6 +98,7 @@ var createAdler = function ({
     css=/*css*/`:host {color: deeppink;}`,
     cssfiles=[],
     debugLog= false,
+    reactivity = "deep",
 }={}) {
     var self = {}
     var componentTag = tag
@@ -117,11 +136,11 @@ var createAdler = function ({
             eventToDisconnect[1].removeEventListener(eventToDisconnect[0], eventToDisconnect[2])
         }
     }
-    var setProps = function (component, holderData) {
+    var setProps = function (component, holderData, signalList) {
         for (const key in props) {
             if (props.hasOwnProperty(key)) {
                 // holderData[key] = props[key]
-                holderData[key] = createSignal(props[key])
+                holderData[key] = createSignal(props[key], reactivity)
                 Object.defineProperty(component, key, { //add getters and setters https://stackoverflow.com/questions/68769030/js-define-getter-for-every-property-of-a-class
                     get() {
                         if (debugLog) {console.log(`(Getting "${key}")`); }
@@ -138,6 +157,29 @@ var createAdler = function ({
                 }); 
                 console.log(`${key}: ${props[key]}`);
             }
+        }
+    }
+    var transferProps = function (component) {
+        for (let i = 0; i < component.attributes.length; i++) {
+            const att = component.attributes[i];
+            for (const key in props) {
+                if (props.hasOwnProperty(key)) {
+                    const prop = props[key];
+                    if (att.nodeName == ":"+key) {
+                        var rootEl = component.getRootNode().host
+                        if (rootEl.isAdler && rootEl._getSignal(att.nodeValue)) {
+                            component._getSignal(key)._replaceValue(rootEl._getSignal(att.nodeValue)._getValue()) //silently replace signal value
+                        }
+                    }
+                    if (att.nodeName == "::"+key) { //unstable, more testing needed TODO
+                        var rootEl = component.getRootNode().host
+                        if (rootEl.isAdler && rootEl._getSignal(att.nodeValue)) {
+                            component._bindSignal(key, rootEl._getSignal(att.nodeValue))
+                        }
+                    }
+                }
+            }
+            
         }
     }
     var setEffects = function (component) {
@@ -175,13 +217,21 @@ var createAdler = function ({
             }
             toDom = utilsToDomElement
             tpl = utilsToTemplate
+
+            _getSignal =function(propName){
+                return this.#holderData[propName]
+            }
+            _bindSignal =function(propName, signal){
+                this.#holderData[propName] = signal
+            }
+            isAdler = true
             
             //END ADLER METHODS
 
             constructor() {
                 super();
                 
-                setProps(this, this.#holderData)
+                setProps(this, this.#holderData, )
                 
                 console.log("component created", this);
             }
@@ -191,6 +241,7 @@ var createAdler = function ({
             }
 
             beforeRender = function () {
+                transferProps(this)//transfer binded props
                 onBeforeRender(this)
             }
 
@@ -222,7 +273,8 @@ var createAdler = function ({
             }
 
             attributeChangedCallback(name, oldValue, newValue) {  
-                console.log(name,newValue);
+                console.log("attributesChange");
+                console.log(name,oldValue,newValue);
                 if (oldValue == newValue) {return}
                 this[name] = newValue //use the setters and getters to record change in local state
             }
