@@ -56,6 +56,7 @@ export const tagNode = {
   atom: true,
 
   attrs: {
+    id: "",
     tag: ""
   },
 
@@ -66,6 +67,7 @@ export const tagNode = {
     return [
       "span",
       {
+        "data-tag-id": node.attrs.id,
         "data-tag": node.attrs.tag,
         class: "prosemirror-tag-node"
       },
@@ -76,12 +78,14 @@ export const tagNode = {
   parseDOM: [
     {
       // match tag with following CSS Selector
-      tag: "span[data-tag]",
+      tag: "span[data-tag][data-tag-id]",
 
       getAttrs: dom => {
         var tag = dom.getAttribute("data-tag");
+        var id = dom.getAttribute("data-tag-id");
         return {
-          tag: tag
+          tag: tag,
+          id: id
         };
       }
     }
@@ -109,9 +113,9 @@ export const arrowNode = {
     return [
       "span",
       {
-        "data-mention-id": node.attrs.id,
-        "data-mention-tag": node.attrs.tag,
-        class: "prosemirror-mention-node"
+        "data-arrow-id": node.attrs.id,
+        "data-arrow-tag": node.attrs.tag,
+        class: "prosemirror-arrow-node"
       },
        node.attrs.tag || node.attrs.text
     ];
@@ -120,12 +124,12 @@ export const arrowNode = {
   parseDOM: [
     {
       // match tag with following CSS Selector
-      tag: "span[data-mention-id][data-mention-tag]",
+      tag: "span[data-arrow-id][data-arrow-tag]",
 
       getAttrs: dom => {
-        var id = dom.getAttribute("data-mention-id");
-        var tag = dom.getAttribute("data-mention-tag");
-        var text = dom.getAttribute("data-mention-tag");
+        var id = dom.getAttribute("data-arrow-id");
+        var tag = dom.getAttribute("data-arrow-tag");
+        var text = dom.getAttribute("data-arrow-tag");
         return {
           id: id,
           tag: tag,

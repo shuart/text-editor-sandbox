@@ -18,13 +18,24 @@ import {addMentionNodes, addTagNodes,addArrowNodes, getMentionsPlugin} from './m
 //  marks: schema.spec.marks
 //})
 
-var createEditor = function(element){
+var createEditor = function({
+  tagsCallbacks={
+    "arrow": (e,view)=> console.log(e),
+    "hashtag": (e,view)=> console.log(e),
+    "at": (e,view)=> console.log(e),
+  },
+  tags ={
+    "arrow": [{id:1,tag: '-> abc'}, {id:2,tag: '-> 123'},],
+    "hashtag": [{id:1,tag: 'abc'}, {id:2,tag: '123'}, ],
+    "at": [{name: 'John Doe', id: '101', email: 'joe@abc.com'}, {name: 'Joe Lewis', id: '102', email: 'lewis@abc.com'}],
+  }
+  }={}){
   var self={}
   var editorElement= undefined
   var tagsArrays ={
-    "arrow": [{id:1,tag: '-> WikiLeaks'}, {id:2,tag: '-> NetNeutrality'}, {id:3,tag: '-> NetNeutrality'}],
-    "hashtag": [{tag: 'WikiLeaks'}, {tag: 'NetNeutrality'}, {tag: 'NetNeutrality'}],
-    "at": [{name: 'John Doe', id: '101', email: 'joe@gmail.com'}, {name: 'Joe Lewis', id: '102', email: 'lewis@gmail.com'}],
+    "arrow": tags["arrow"] || [],
+    "hashtag": tags["hashtag"] || [{tag: 'WikiLeaks'}, {tag: 'NetNeutrality'}, {tag: 'NetNeutrality'}],
+    "at": tags["at"] || [{name: 'John Doe', id: '101', email: 'joe@gmail.com'}, {name: 'Joe Lewis', id: '102', email: 'lewis@gmail.com'}],
   }
 
 
@@ -171,11 +182,7 @@ var createEditor = function(element){
   }
 
   var mentionPlugin = getMentionsPlugin({
-      functionOnClick: (event, view)=> {
-        console.log(view) 
-        findInNode(view.state.doc, view.state.doc, "test")
-        //console.log("teest")
-      },
+      functionOnClick: tagsCallbacks,
       getSuggestions: (type, text, done) => {
         console.log(text);
         setTimeout(() => {
@@ -234,7 +241,7 @@ var createEditor = function(element){
     return editorElement.state.doc.textBetween(0, editorElement.state.doc.nodeSize - 2, '\n', '\n')
   }
 
-
+  self.findInNode = findInNode
   self.getFullText = getFullText
   self.addEditor = addEditor
   self.setTags = setTags

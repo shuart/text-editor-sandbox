@@ -4,7 +4,13 @@ import { HelloWorld } from './wcomp.js'
 import { treeView } from './treeView.js'
 
 //var editor = createEditor({container:document.querySelector('.element')})
-var editor = createEditor()
+var editor = createEditor({
+  tagsCallbacks:{
+    "arrow": (e,view)=> console.log(e,view),
+    "hashtag": (e,view)=> console.log(e,view),
+    "at": (e,view)=> console.log(e,view),
+  },
+})
 editor.addEditor(document.querySelector('.element'))
 
 

@@ -124,7 +124,11 @@ export function getMentionsPlugin(opts) {
   var defaultOpts = {
     mentionTrigger: "@",
     hashtagTrigger: "#",
-    functionOnClick: (event)=> console.log(event),
+    functionOnClick: {
+      "arrow": (e,view)=> console.log(e),
+      "hashtag": (e,view)=> console.log(e),
+      "at": (e,view)=> console.log(e),
+    },
     allowSpace: true,
     getSuggestions: (type, text, cb) => {
       cb([]);
@@ -246,6 +250,7 @@ export function getMentionsPlugin(opts) {
       };
     } else  if (state.type === "tag"){
       attrs = {
+        id: item.id,
         tag: item.tag
       };
     }else {
@@ -338,7 +343,25 @@ export function getMentionsPlugin(opts) {
       },
       handleClick(view, _, event) {
         if (/prosemirror-mention-node/.test(event.target.className)) {
-          opts.functionOnClick(event, view)
+          opts.functionOnClick["at"](event, view)
+          // let {from, to} = event.target.problem
+          // view.dispatch(
+          //   view.state.tr
+          //     .setSelection(TextSelection.create(view.state.doc, from, to))
+          //     .scrollIntoView())
+          return true
+        }
+        if (/prosemirror-tag-node/.test(event.target.className)) {
+          opts.functionOnClick["hashtag"](event, view)
+          // let {from, to} = event.target.problem
+          // view.dispatch(
+          //   view.state.tr
+          //     .setSelection(TextSelection.create(view.state.doc, from, to))
+          //     .scrollIntoView())
+          return true
+        }
+        if (/prosemirror-arrow-node/.test(event.target.className)) {
+          opts.functionOnClick["arrow"](event, view)
           // let {from, to} = event.target.problem
           // view.dispatch(
           //   view.state.tr
