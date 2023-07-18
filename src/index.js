@@ -19,6 +19,8 @@ import {addMentionNodes, addTagNodes,addArrowNodes, getMentionsPlugin} from './m
 //})
 
 var createEditor = function({
+  initialJson=undefined,
+  initialDomValue = "",
   tagsCallbacks={
     "arrow": (e,view)=> console.log(e),
     "hashtag": (e,view)=> console.log(e),
@@ -219,10 +221,18 @@ var createEditor = function({
 
 
   var addEditor = function (element) {
+    var currentDoc =DOMParser.fromSchema(mySchema).parse(initialDomValue)
+    if (initialJson) {
+      currentDoc =mySchema.nodeFromJSON(initialJson)
+    }
+    
+    if (document.querySelector("#content")) {
+      currentDoc = DOMParser.fromSchema(mySchema).parse(document.querySelector("#content"))
+    }
 
     window.view = new EditorView(element, {
     state: EditorState.create({
-        doc: DOMParser.fromSchema(mySchema).parse(document.querySelector("#content")),
+        doc: currentDoc,
         plugins: plugins
       // plugins: prosemirrorExampleSetup.exampleSetup({schema: prosemirrorSchemaBasic.schema}).concat(lintPlugin)
       })
